@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style type="text/css">
+  * {
+    margin: 0;
+    padding: 0;
+  }
+	.node, .g2 {
+    cursor: pointer;
+  }
+
+  .overlay{
+      background-color:#EEE;
+  }
+   
+  .node circle, .g2 circle {
+    fill: #fff;
+    stroke: steelblue;
+    stroke-width: 1.5px;
+  }
+   
+  .node text, .g2 text {
+    font-size:10px; 
+    font-family:sans-serif;
+    fill: #fff;
+  }
+   
+  .link {
+    fill: none;
+    stroke: #ccc;
+    stroke-width: 1.5px;
+  }
+
+  .templink {
+    fill: none;
+    stroke: red;
+    stroke-width: 3px;
+  }
+
+  .ghostCircle.show{
+      display:block;
+  }
+
+  .ghostCircle, .activeDrag .ghostCircle{
+       display: none;
+  }
+
+  .tree-2 {
+    /* margin-top: 500px; */
+  }
+
+</style>
+<script src="./js/jquery-1.10.2.min.js"></script>
+<script src="./js/d3.v3.min.js"></script>
+<script src="dndTree.js"></script>
+<script src="dndTree-2.js"></script>
+<body>
+    <div id="tree-container"></div>
+    <div class="tree-2">
+      <div id="tree-container-2"></div>
+    </div>
+</body>
+</html>
