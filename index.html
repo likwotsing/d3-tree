@@ -1,59 +1,16 @@
 <!DOCTYPE html>
-<meta charset="utf-8">
-<style type="text/css">
-  * {
-    margin: 0;
-    padding: 0;
-  }
-	.node, .g2 {
-    cursor: pointer;
-  }
-
-  .overlay{
-      background-color:#EEE;
-  }
-   
-  .node circle, .g2 circle {
-    fill: #fff;
-    stroke: steelblue;
-    stroke-width: 1.5px;
-  }
-   
-  .node text, .g2 text {
-    font-size:10px; 
-    font-family:sans-serif;
-    fill: #fff;
-  }
-   
-  .link {
-    fill: none;
-    stroke: #ccc;
-    stroke-width: 1.5px;
-  }
-
-  .templink {
-    fill: none;
-    stroke: red;
-    stroke-width: 3px;
-  }
-
-  .ghostCircle.show{
-      display:block;
-  }
-
-  .ghostCircle, .activeDrag .ghostCircle{
-       display: none;
-  }
-
-  .tree-2 {
-    /* margin-top: 500px; */
-  }
-
-</style>
-<script src="./js/jquery-1.10.2.min.js"></script>
-<script src="./js/d3.v3.min.js"></script>
-<script src="dndTree.js"></script>
-<script src="dndTree-2.js"></script>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="./css/index.css">
+  <script src="./js/jquery-1.10.2.min.js"></script>
+  <script src="./js/d3.v3.min.js"></script>
+  <script src="dndTree.js"></script>
+  <script src="dndTree-2.js"></script>
+</head>
 <body>
     <div id="tree-container"></div>
     <div class="tree-2">
