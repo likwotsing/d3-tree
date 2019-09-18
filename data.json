@@ -1,0 +1,47 @@
+{
+  "author": {
+    "name": "andy",
+    "children": [
+     {
+      "name": "bob",
+      "children": [
+       {
+        "name": "bob",
+        "children": [
+         {"name": "carl", "size": 3938},
+         {"name": "carl", "size": 3812},
+         {"name": "carl", "size": 6714},
+         {"name": "andy", "size": 743}
+        ]
+       }
+      ]
+     }
+    ]
+   },
+  "plot": {
+    "name": "三国演义",
+    "author": "andy",
+    "children": [
+     {
+      "name": "第一章",
+      "author": "bob",
+      "children": [
+       {
+        "name": "第一节",
+        "author": "andy",
+        "children": [
+         {"name": "第一回合",
+          "author": "carl", "size": 3938},
+         {"name": "第2回合",
+          "author": "carl", "size": 3812},
+         {"name": "第3回合",
+          "author": "carl", "size": 6714},
+         {"name": "第4回合",
+          "author": "bob", "size": 743}
+        ]
+       }
+      ]
+     }
+    ]
+   }
+}

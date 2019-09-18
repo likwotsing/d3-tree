@@ -1,8 +1,8 @@
 
 // Get JSON data
-treeJSON = d3.json("flare.json", function(error, treeData) {
-// treeJSON = d3.json("flare copy.json", function(error, treeData) {
-
+// treeJSON = d3.json("flare.json", function(error, treeData) {
+  treeJSON = d3.json("data.json", function(error, treeData) {
+    treeData = treeData.author;
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -120,17 +120,32 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
 
     // Toggle children on click.
     var clickTimeId = null;
+    var lastCName = null;
 
     function clickG(d) {
       // alert(d.name)
       centerNode(d);
-
+var cName = '.' + d.name; // 点击的作者名称
       // d3.selectAll('rect')
       d3.selectAll('.rect1')
         .style('fill', function(d) {
           return 'lightsteelblue'
         })
+if(lastCName) {
+  d3.selectAll(lastCName)
+  .select('rect')
+  .style('fill', function(d) {
+    return 'lightsteelblue'
+  })
+}
+        d3.selectAll(cName)
+        .select('rect')
+        .style('fill', function(d) {
+          return 'red'
+        })
       
+lastCName = cName;
+
       d3.select(this)
         .select('rect')
         .style('fill', function(d) {
@@ -183,7 +198,7 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Set widths between levels based on maxLabelLength.
         nodes.forEach(function(d) {
-            d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
+            d.y = (d.depth * (maxLabelLength * 20)); //maxLabelLength * 10px
             // d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
             // alternatively to keep a fixed scale one can set a fixed depth per level
             // Normalize for fixed-depth by commenting out below line

@@ -1,12 +1,11 @@
 
 d3.xhr('https://cnodejs.org/api/v1/topics', function(p1, p2) {
-  debugger
 })
 
 // Get JSON data
-treeJSON = d3.json("flare.json", function(error, treeData) {
-// treeJSON = d3.json("flare copy.json", function(error, treeData) {
-
+// treeJSON = d3.json("flare.json", function(error, treeData) {
+treeJSON = d3.json("data.json", function(error, treeData) {
+    treeData = treeData.plot;
     // Calculate total nodes, max label length
     var totalNodes = 0;
     var maxLabelLength = 0;
@@ -188,7 +187,7 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Set widths between levels based on maxLabelLength.
         nodes.forEach(function(d) {
-            d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
+            d.y = (d.depth * (maxLabelLength * 20)); //maxLabelLength * 10px
             // d.y = (d.depth * (maxLabelLength * 10)); //maxLabelLength * 10px
             // alternatively to keep a fixed scale one can set a fixed depth per level
             // Normalize for fixed-depth by commenting out below line
@@ -204,8 +203,11 @@ treeJSON = d3.json("flare.json", function(error, treeData) {
 
         // Enter any new nodes at the parent's previous position.
         var nodeEnter = node.enter().append("g")
-            .attr("class", "node")
-            .attr("class", "g2")
+            // .attr("class", "node")
+            // .attr("class", "g2")
+            .attr("class", function(d) {
+              return 'g2 ' + d.author
+            })
             .attr('id', function(d) {
               return d.id
             })
