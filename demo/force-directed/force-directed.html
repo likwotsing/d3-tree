@@ -23,16 +23,16 @@
   </style>
 </head>
 <body>
-    <svg width="960" height="600"></svg>
+    <svg id="force-svg" width="960" height="600"></svg>
 </body>
 
 
-<script src="../js/jquery-1.10.2.min.js"></script>
+<script src="../../js/jquery-1.10.2.min.js"></script>
 <!-- <script src="../js/d3.v3.min.js"></script> -->
-<script src="../js/d3.v4.min.js"></script>
+<script src="../../js/d3.v4.min.js"></script>
 
 <script>
-var svg = d3.select("svg")
+var svg = d3.select("#force-svg")
             .attr("width", 960)
             .attr("height", 600)
 var width = svg.attr("width"),
