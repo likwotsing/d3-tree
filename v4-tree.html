@@ -53,11 +53,12 @@ label {
 tree = data => {
   const root = d3.hierarchy(data);
   const width = 960;
-  root.dx = 20; // 更改link上下的高度
+  root.dx = 30; // 更改link上下的高度
   root.dy = width / (root.height + 1);
   return d3.tree().nodeSize([root.dx, root.dy])(root);
 }
 
+var lastCName = null;
 
 // d3.csv("flare.csv", function(error, data) {
 d3.json("flare-v4.json", function(error, data) {
@@ -91,7 +92,7 @@ d3.json("flare-v4.json", function(error, data) {
     // .attr("viewBox", [0, 0, width, x1 - x0 + root.dx * 2])
     .call(zoomListener);
   var g = baseSvg.append("g")
-    .attr("transform", "translate(40,50)")
+    .attr("transform", "translate(40,100)")
     // .call(d3.zoom().on("zoom", zoomListener));
 
   // var svg = d3.select("svg"),
@@ -99,6 +100,20 @@ d3.json("flare-v4.json", function(error, data) {
   //     height = +svg.attr("height"),
   //     g = svg.append("g").attr("transform", "translate(40,100)");
 
+  
+  function clickG(d) {
+    var cName = '.' + d.data.id; // 点击的作者名称
+    // d3.selectAll('rect')
+    d3.selectAll('rect')
+      .style('fill', function(d) {
+        return 'lightsteelblue'
+      })
+    d3.select(this)
+      .select('rect')
+      .style('fill', function(d) {
+        return '#336BA3'
+      })
+  }
 
   var link = g.selectAll(".link")
       .data(root.descendants().slice(1))
@@ -113,17 +128,33 @@ d3.json("flare-v4.json", function(error, data) {
       .attr("class", function(d) { return "node" + (d.children ? " node--internal" : " node--leaf"); })
       .attr("transform", function(d) { 
         return "translate(" + d.y + "," + d.x + ")"; 
-      });
+      })
+    .on('click', clickG)
 
-  node.append("circle")
-      .attr("r", 2.5);
+  node.append("rect")
+      .attr('class', 'nodeCircle')
+      .attr('class', 'rect1')
+      .attr("width", 40)
+      .attr("height", 22)
+      .attr("x", 0)
+      .attr("y", -11)
+      .style("fill", function(d) {
+          return "lightsteelblue";
+          // return d._children ? "lightsteelblue" : "#336BA3";
+      })
+  // node.append("circle")
+  //     .attr("r", 2.5);
 
   node.append("text")
       .attr("dy", 3)
       .attr("x", function(d) {
-        return d.children ? -8 : 8; 
+        return 8; 
+        // return d.children ? -8 : 8; 
       })
-      .style("text-anchor", function(d) { return d.children ? "end" : "start"; })
+      .style("text-anchor", function(d) { 
+        return "start"; 
+        // return d.children ? "end" : "start"; 
+      })
       .text(function(d) { 
         return d.data.id
         // return d.id.substring(d.id.lastIndexOf(".") + 1); 
