@@ -32,9 +32,13 @@
 <script src="../js/d3.v4.min.js"></script>
 
 <script>
-var svg = d3.select("svg"),
-    width = +svg.attr("width"),
-    height = +svg.attr("height");
+var svg = d3.select("svg")
+            .attr("width", 960)
+            .attr("height", 600)
+var width = svg.attr("width"),
+    height = svg.attr("height");
+    // width = +svg.attr("width"),
+    // height = +svg.attr("height");
 
 var color = d3.scaleOrdinal(d3.schemeCategory20);
 
@@ -58,6 +62,11 @@ d3.json("miserables.json", function(error, graph) {
     .selectAll("g")
     .data(graph.nodes)
     .enter().append("g")
+    .on("click", clickG)
+  
+  function clickG(d) {
+    alert(d.id)
+  }
     
   var circles = node.append("circle")
       .attr("r", 5)
