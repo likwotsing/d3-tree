@@ -1,0 +1,14 @@
+{
+  "id": "andy",
+  "children": [
+   {
+    "id": "bob",
+    "children": [
+     {"id": "bob", "size": 3938},
+     {"id": "echo", "size": 3812},
+     {"id": "david", "size": 6714},
+     {"id": "carl", "size": 743}
+    ]
+   }
+  ]
+ }

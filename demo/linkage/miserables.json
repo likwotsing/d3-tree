@@ -1,0 +1,16 @@
+
+{
+  "nodes": [
+    {"id": "andy", "group": 1},
+    {"id": "bob", "group": 1},
+    {"id": "carl", "group": 2},
+    {"id": "david", "group": 2},
+    {"id": "echo", "group": 2}
+  ],
+  "links": [
+    {"source": "bob", "target": "andy", "value": 2},
+    {"source": "david", "target": "carl", "value": 1},
+    {"source": "david", "target": "andy", "value": 5},
+    {"source": "echo", "target": "david", "value": 1}
+  ]
+}
