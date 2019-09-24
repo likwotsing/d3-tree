@@ -61,17 +61,20 @@
 </head>
 <body>
   <div id="author-svg"></div>
+  <svg id="svg-1" width="400" height="400" viewBox="-20 -20 440 440"></svg>
   <div id="tree-container"></div>
 
   <script src="../../js/jquery-1.10.2.min.js"></script>
   <!-- <script src="../../js/d3.v4.min.js"></script> -->
   <script src="../../js/d3.v4.js"></script>
+  <script src="../../js/d3.v5.js"></script>
+  <script src="../../js/d3-dag.min.js"></script>
 
   <script>
       var svg = d3v4.select("#author-svg")
                   .append("svg")
-                  .attr("width", 960)
-                  .attr("height", 400)
+                  .attr("width", 460)
+                  .attr("height", 200)
       var width = svg.attr("width"),
           height = svg.attr("height");
 
@@ -280,5 +283,110 @@ function diagonal(d) {
       + " " + d.parent.y + "," + d.parent.x;
 }
   </script>
+  <script>
+
+      var width = 400;
+      var height = 400;
+      var layout = d3.sugiyama()
+        .size([width, height])
+        .layering(d3.layeringSimplex())
+        .decross(d3.decrossOpt())
+        .coord(d3.coordVert())
+    
+    
+      getDag()
+    
+      function renderDag(dag) {
+        const nodeRadius = 20;
+      // const svgDom = document.createElement('svg')
+      // svgDom.setAttribute('width', 400)
+      // svgDom.setAttribute('height', 400)
+      // svgDom.setAttribute('viewbox', '-20 -20 440 440')
+      const svgDom = document.getElementById('svg-1')
+      svgNode = svgDom
+      console.log(svgDom)
+        // .attr('viewBox', '-20 -20 440 440')
+      // const svgNode = svg`<svg width=${width} height=${height} viewbox="${-nodeRadius} ${-nodeRadius} ${width + 2 * nodeRadius} ${height + 2 * nodeRadius}"></svg>`
+      
+      const svgSelection = d3.select(svgNode);
+      const defs = svgSelection.append('defs'); // For gradients
+      
+      layout(dag)
+      
+      const steps = dag.size();
+      const interp = d3.interpolateRainbow;
+      const colorMap = {};
+      dag.each((node, i) => {
+        colorMap[node.id] = interp(i / steps);
+      });
+      
+      // How to draw edges
+      const line = d3.line()
+        .curve(d3.curveCatmullRom)
+        .x(d => d.x)
+        .y(d => d.y);
+        
+      // Plot edges
+      svgSelection.append('g')
+        .selectAll('path')
+        .data(dag.links())
+        .enter()
+        .append('path')
+        .attr('d', ({ data }) => {
+          return line(data.points)
+        })
+        .attr('fill', 'none')
+        .attr('stroke-width', 3)
+        .attr('stroke', ({source, target}) => {
+          const gradId = `${source.id}-${target.id}`;
+          const grad = defs.append('linearGradient')
+            .attr('id', gradId)
+            .attr('gradientUnits', 'userSpaceOnUse')
+            .attr('x1', source.x)
+            .attr('x2', target.x)
+            .attr('y1', source.y)
+            .attr('y2', target.y);
+          grad.append('stop').attr('offset', '0%').attr('stop-color', 'lightsteelblue');
+          grad.append('stop').attr('offset', '100%').attr('stop-color', 'lightsteelblue');
+          // grad.append('stop').attr('offset', '0%').attr('stop-color', colorMap[source.id]);
+          // grad.append('stop').attr('offset', '100%').attr('stop-color', colorMap[target.id]);
+          return `url(#${gradId})`;
+        });
+      
+      // Select nodes
+      const nodes = svgSelection.append('g')
+        .selectAll('g')
+        .data(dag.descendants())
+        .enter()
+        .append('g')
+        .attr('transform', ({x, y}) => `translate(${x}, ${y})`);
+      
+      // Plot node circles
+      nodes.append('circle')
+        .attr('r', 20)
+        .attr('fill', n => {
+          return 'lightsteelblue'
+          // return colorMap[n.id]
+        });
+    
+      // Add text to nodes
+      nodes.append('text')
+        .text(d => d.id)
+        .attr('font-weight', 'bold')
+        .attr('font-family', 'sans-serif')
+        .attr('text-anchor', 'middle')
+        .attr('alignment-baseline', 'middle')
+        .attr('fill', 'white');
+      }
+    
+    
+      async function getDag() {
+        // const dag_data = await d3.json(`https://raw.githubusercontent.com/erikbrinkman/d3-dag/master/examples/grafo.json`);
+        const dag_data = await d3.json(`grafo.json`);
+        var dag = d3.dagStratify()(dag_data);
+        renderDag(dag)
+      }
+      
+      </script>
 </body>
 </html>
