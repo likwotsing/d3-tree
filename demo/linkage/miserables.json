@@ -1,11 +1,16 @@
 
 {
   "nodes": [
-    {"id": "andy", "group": 1},
-    {"id": "bob", "group": 1},
-    {"id": "carl", "group": 2},
-    {"id": "david", "group": 2},
-    {"id": "echo", "group": 2}
+    {"id": "andy", "group": 1,
+    "paragraphid": ["p1", "p2"]},
+    {"id": "bob", "group": 1,
+      "paragraphid": ["p3", "p4"]},
+    {"id": "carl", "group": 2,
+      "paragraphid": ["p5", "p6"]},
+    {"id": "david", "group": 2,
+      "paragraphid": ["p7", "p8"]},
+    {"id": "echo", "group": 2,
+      "paragraphid": ["p9", "p10"]}
   ],
   "links": [
     {"source": "bob", "target": "andy", "value": 2},

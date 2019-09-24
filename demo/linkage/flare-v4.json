@@ -4,10 +4,10 @@
    {
     "id": "bob",
     "children": [
-     {"id": "bob", "size": 3938},
-     {"id": "echo", "size": 3812},
-     {"id": "david", "size": 6714},
-     {"id": "carl", "size": 743}
+     {"id": "bob", "size": 3938, "chapterid": "001001"},
+     {"id": "echo", "size": 3812, "chapterid": "001002"},
+     {"id": "david", "size": 6714, "chapterid": "001003"},
+     {"id": "carl", "size": 743, "chapterid": "001004"}
     ]
    }
   ]

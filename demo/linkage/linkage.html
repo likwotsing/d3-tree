@@ -57,6 +57,19 @@
       font-family: sans-serif;
       font-size: 10px;
     }
+
+    .circle-inactive {
+      fill: lightsteelblue;
+    }
+    .circle-active {
+      fill: red;
+    }
+    .chapter-inactive {
+      fill: lightsteelblue;
+    }
+    .chapter-active {
+      fill: red;
+    }
   </style>
 </head>
 <body>
@@ -103,37 +116,74 @@
           .selectAll("g")
           .data(graph.nodes)
           .enter().append("g")
+          .attr("class", function(d) {
+            var paragraphid = d.paragraphid;
+            var cname = '';
+            if(paragraphid) {
+              for(var i = 0; i < d.paragraphid.length; i++) {
+                cname += d.paragraphid[i] + ' '
+              }
+              return cname;
+            }
+          })
           .on("click", clickForceNode)
         
         function clickForceNode(d) {
-          var cName = '.' + d.id; // 点击的作者名称
-          // d3v4.selectAll('rect')
-          d3v4.selectAll('.rect1')
-            .style('fill', function(d) {
-              return 'lightsteelblue'
-            })
-          if(lastCName) {
-            d3v4.selectAll(lastCName)
-              .select('rect')
-              .style('fill', function(d) {
-                return 'lightsteelblue'
-              })
-          }
-          d3v4.selectAll(cName)
-            .select('rect')
-            .style('fill', function(d) {
-              return 'red'
-            })
+          var paragraphs_id = [];
+          var chapterid = [];
 
-          lastCName = cName;
+          paragraphs_id = d.paragraphid
 
-          d3v4.select(this)
-            .select('rect')
-            .style('fill', function(d) {
-              return '#336BA3'
-            })
+          chapterid = updateDagNode(paragraphs_id);
+          updateChapterNode(chapterid)
+
+          return
+
+
+          // var cName = '.' + d.id; // 点击的作者名称
+          // // d3v4.selectAll('rect')
+          // d3v4.selectAll('.rect1')
+          //   .style('fill', function(d) {
+          //     return 'lightsteelblue'
+          //   })
+          // if(lastCName) {
+          //   d3v4.selectAll(lastCName)
+          //     .select('rect')
+          //     .style('fill', function(d) {
+          //       return 'lightsteelblue'
+          //     })
+          // }
+
+
+          // d3.selectAll('.circle-dag')
+          //   .select('circle')
+          //   .style('fill', function(d) {
+          //     return 'lightsteelblue';
+          //   })
+          // d3.selectAll(cName)
+          //   .select('circle')
+          //   .style('fill', function(d) {
+          //     return 'red';
+          //   })
+
+
+          // d3v4.selectAll(cName)
+          //   .select('rect')
+          //   .style('fill', function(d) {
+          //     return 'red'
+          //   })
+
+          // // d3v4.select(this)
+          // d3v4.select(cName)
+          //   .select('rect')
+          //   .style('fill', function(d) {
+          //     return '#336BA3'
+          //   })
+
+          // lastCName = cName;
         }
           
+
         var circles = node.append("circle")
             .attr("r", 5)
             .attr("fill", function(d) { return color(d.group); })
@@ -243,10 +293,11 @@ d3v4.json("flare-v4.json", function(error, data) {
   var node = g.selectAll(".node")
       .data(root.descendants())
     .enter().append("g")
-      .attr("class", function(d) { 
-        return "node " + d.data.id
-        // return "node" + (d.children ? " node--internal" : " node--leaf"); 
-      })
+    .classed('node', true)
+      // .attr("class", function(d) { 
+      //   return "node " + d.data.id
+      //   // return "node" + (d.children ? " node--internal" : " node--leaf"); 
+      // })
       .attr("transform", function(d) { 
         return "translate(" + d.y + "," + d.x + ")"; 
       })
@@ -254,14 +305,20 @@ d3v4.json("flare-v4.json", function(error, data) {
 
   node.append("rect")
       .attr('class', 'nodeCircle')
-      .attr('class', 'rect1')
+      // .attr('class', 'rect1')
+      .attr('chapterid', function(d) {
+        if(d.data.chapterid) {
+          return d.data.chapterid;
+        }
+      })
+      .classed('chapter-inactive', true)
       .attr("width", 40)
       .attr("height", 22)
       .attr("x", 0)
       .attr("y", -11)
-      .style("fill", function(d) {
-          return "lightsteelblue";
-      })
+      // .style("fill", function(d) {
+      //     return "lightsteelblue";
+      // })
 
   node.append("text")
       .attr("dy", 3)
@@ -359,15 +416,35 @@ function diagonal(d) {
         .data(dag.descendants())
         .enter()
         .append('g')
-        .attr('transform', ({x, y}) => `translate(${x}, ${y})`);
+        .attr('transform', ({x, y}) => `translate(${x}, ${y})`)
+        .attr('class', function(d) {
+          var parentIds = d.data.parentIds;
+          var cname = 'circle-dag '
+          if(parentIds) {
+            for(var i = 0; i < parentIds.length; i++) {
+              cname += parentIds[i] + ' ';
+            }
+          }
+          return cname;
+        })
+        .on('click', clickParagraphNode)
+
+
       
       // Plot node circles
       nodes.append('circle')
         .attr('r', 20)
-        .attr('fill', n => {
-          return 'lightsteelblue'
-          // return colorMap[n.id]
-        });
+        .attr('class', function(d) {
+          return d.data.chapterid
+        })
+        .classed('circle-inactive', true)
+        .attr('chapterid', function(d) {
+          return d.data.chapterid
+        })
+        // .attr('fill', n => {
+        //   return 'lightsteelblue'
+        //   // return colorMap[n.id]
+        // });
     
       // Add text to nodes
       nodes.append('text')
@@ -387,6 +464,66 @@ function diagonal(d) {
         renderDag(dag)
       }
       
+      function clickParagraphNode(d) {
+        var chapterid = [d.data.chapterid]
+        // 1. 更新paragraph图，
+        // 2. 更新chapter图
+        d3.selectAll('.circle-dag')
+          .select('circle')
+          .classed('circle-inactive', true)
+          .classed('circle-active', false)
+        
+        d3.select(this)
+          .select('circle')
+          .classed('circle-inactive', false)
+          .classed('circle-active', true)
+        // updateClickParagraphNod()
+        updateChapterNode(chapterid)
+      }
+
+      function updateDagNode(pid = []) {
+        var chapterid = new Set();
+        
+        d3.selectAll('.circle-dag')
+          .select('circle')
+          .classed('circle-inactive', true)
+          .classed('circle-active', false)
+          // .style('fill', function(d) {
+          //   return 'lightsteelblue';
+          // })
+        
+        pid.forEach(function(c, i, a) {
+          d3.select('#svg-1')
+          .selectAll('.' + c)
+          .select('circle')
+          .classed('circle-inactive', false)
+          .classed('circle-active', function(d) {
+            chapterid.add(d.data.chapterid)
+            return true;
+          })
+          // .style('fill', function(d) {
+          //   return 'red';
+          // })
+        })
+        return Array.from(chapterid);
+      }
+      function updateChapterNode(chapterid = []) {
+          // 有2种情况：
+          // 1. 点击author树，先改变paragraph树，根据paragraph里的circle-active，再改变chapter树
+          // 2. 直接点击paragraph树，根据chapter-active改变chapter树
+          d3.select('#tree-container')
+              .selectAll('rect')
+              .classed('chapter-inactive', true)
+              .classed('chapter-active', false)
+
+          chapterid.forEach(function(c, i, a) {
+            d3.select('#tree-container')
+              .selectAll('rect[chapterid="' + c + '"]')
+              // .select('rect')
+              .classed('chapter-inactive', false)
+              .classed('chapter-active', true)
+          })
+        }
       </script>
 </body>
 </html>
