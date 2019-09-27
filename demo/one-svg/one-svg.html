@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style2.css">
+  <link rel="stylesheet" href="./svg-indented.css">
+  <style>
+    .link-inactive {
+      fill: none;
+      stroke: #888888;
+      stroke-width: 1px;
+      stroke-opacity: 0.5;
+    }
+    .link-active {
+      fill: none;
+      stroke: red;
+      stroke-width: 2px;
+    }
+    .node-inactive {
+      stroke: none;
+      fill: #cccccc;
+    }
+    .node-active {
+      stroke: none;
+      fill: red;
+    }
+  </style>
+</head>
+<body>
+  
+    <svg id="svg-indented"></svg>
+  <script src="../../js/d3.v3.js"></script>
+  <script src="../../js/d3.v4.js"></script>
+  <script>
+/* GLOBALS */
+
+var width  = 960;           // width of svg image
+var height = 1600;           // height of svg image
+var marginArc = 20;            // amount of marginArc around plot area
+var pad = marginArc / 2;       // actual padding amount
+var radius = 4;             // fixed node radius
+var yfixed = pad + radius;  // y position for all nodes
+var renderGraph = null;
+
+/* HELPER FUNCTIONS */
+
+// Generates a tooltip for a SVG circle element based on its ID
+function addTooltip(rect) {
+    var x = parseFloat(rect.attr("x"));
+    var y = parseFloat(rect.attr("y"));
+    var r = 4;
+    var text = rect.attr("id");
+
+    var tooltip = d3.select("#plot")
+        .append("text")
+        .text(text)
+        .attr("x", x)
+        .attr("y", y)
+        .attr("dy", -r * 2)
+        .attr("id", "tooltip");
+
+    var offset = tooltip.node().getBBox().width / 2;
+
+    if ((x - offset) < 0) {
+        tooltip.attr("text-anchor", "start");
+        tooltip.attr("dx", -r);
+    }
+    else if ((x + offset) > (width - marginArc)) {
+        tooltip.attr("text-anchor", "end");
+        tooltip.attr("dx", r);
+    }
+    else {
+        tooltip.attr("text-anchor", "middle");
+        tooltip.attr("dx", 0);
+    }
+}
+
+/* MAIN DRAW METHOD */
+
+// Draws an arc diagram for the provided undirected graph
+function arcDiagram(graph) {
+    // create svg image
+    // var svg  = d3.select("body")
+    //     .append("svg")
+    //     .attr("id", "arc")
+    // var svg  = d3.select("#svg-arc")
+    //     .attr("width", width)
+    //     .attr("height", height)
+    var svg  = d3.select("#svg-indented")
+
+    // draw border around svg image
+    // svg.append("rect")
+    //     .attr("class", "outline")
+    //     .attr("width", width)
+    //     .attr("height", height);
+
+    // create plot area within svg image
+    var plot = svg.append("g")
+        .attr("id", "plot")
+        .attr("transform", "translate(" + 800 + ", " + 0 + ")");
+        // .attr("transform", "translate(" + pad * 50 + ", " + pad + ")");
+        // .attr("transform", "translate(" + pad + ", " + pad + ")");
+
+    // fix graph links to map to objects instead of indices
+    graph.links.forEach(function(d, i) {
+        var source = d.source + '';
+        var target = d.target + '';
+        d.source = isNaN(d.source) ? d.source : graph.nodes[d.source];
+        d.target = isNaN(d.target) ? d.target : graph.nodes[d.target];
+        d.source.source = source;
+        d.target.target = target
+    });
+
+    renderGraph = graph;
+    // must be done AFTER links are fixed
+    linearLayout(graph.nodes);
+
+    // draw links first, so nodes appear on top
+    drawLinks(graph.links);
+
+    // draw nodes last
+    drawNodes(graph.nodes);
+}
+
+// Layout nodes linearly, sorted by group
+function linearLayout(nodes) {
+    // sort nodes by group
+    // nodes.sort(function(a, b) {
+    //     return a.group - b.group;
+    // })
+
+    // used to scale node index to x position
+    var xscale = d3.scale.linear()
+        .domain([0, nodes.length - 1])
+        .range([radius, width - marginArc - radius]);
+
+    // calculate pixel location for each node
+    nodes.forEach(function(d, i) {
+        d.y = xscale(i * 1.2);
+        d.x = yfixed;
+    });
+    // nodes.forEach(function(d, i) {
+    //     d.x = xscale(i);
+    //     d.y = yfixed;
+    // });
+}
+
+// Draws nodes on plot
+function drawNodes(nodes) {
+    // used to assign nodes color by group
+    var color = d3.scale.category20();
+
+    var gNode = d3.select("#plot").selectAll(".node")
+        .data(nodes)
+        .enter()
+        .append('g')
+
+        gNode.append("rect")
+        .attr("class", "node")
+        .attr("id", function(d, i) { return d.name; })
+        .attr("x", function(d, i) { return d.x; })
+        .attr("y", function(d, i) { 
+          return d.y - 1
+         })
+        .attr('width', 100)
+        .attr('height', 2)
+        .classed('node-inactive', true)
+        .attr('source', function(d, i) {
+          if(d.source) {
+            return d.source;
+          }
+        })
+        .attr('target', function(d, i) {
+          if(d.target) {
+            return d.target;
+          }
+        })
+        .on("mouseover", function(d, i) { 
+          addTooltip(d3.select(this));
+         })
+        .on("mouseout",  function(d, i) { d3.select("#tooltip").remove(); })
+        .on('click', clickAuthorRect)
+      
+      function clickAuthorRect(clickNode, clickIndex) {
+        var linkNodeSet = new Set();
+        var linkNodeArr = [];
+
+        d3.selectAll('.author-link')
+          .classed('link-inactive', true)
+          .classed('link-active', false)
+
+        d3.selectAll('.author-link[source="' + clickIndex + '"]')
+          .classed('link-active', function(d, i) {
+            if(d.source.source) {
+              linkNodeSet.add(d.source.source)
+            }
+            if(d.source.target) {
+              linkNodeSet.add(d.source.target)
+            }
+            if(d.target.souce) {
+              linkNodeSet.add(d.target.souce)
+            }
+            if(d.target.target) {
+              linkNodeSet.add(d.target.target)
+            }
+            return true;
+
+          })
+        d3.selectAll('.author-link[target="' + clickIndex + '"]')
+          .classed('link-active', function(d, i) {
+            if(d.source.source) {
+              linkNodeSet.add(d.source.source)
+            }
+            if(d.source.target) {
+              linkNodeSet.add(d.source.target)
+            }
+            if(d.target.souce) {
+              linkNodeSet.add(d.target.souce)
+            }
+            if(d.target.target) {
+              linkNodeSet.add(d.target.target)
+            }
+            return true;
+          })
+
+
+        d3.selectAll('.node')
+          .classed('node-inactive', true)
+          .classed('node-active', false)
+        linkNodeArr  = Array.from(linkNodeSet)
+        linkNodeArr.forEach(function(c, i, a) {
+          d3.selectAll('.node[source="' + c + '"]')
+            .classed('node-active', true)
+          d3.selectAll('.node[target="' + c + '"]')
+            .classed('node-active', true) 
+        })
+      }
+
+        // gNode.append("circle")
+        // .attr("class", "node")
+        // .attr("id", function(d, i) { return d.name; })
+        // .attr("cx", function(d, i) { return d.x; })
+        // .attr("cy", function(d, i) { 
+        //   return d.y
+        //  })
+        // .attr("r",  function(d, i) { return radius; })
+        // .style("fill",   function(d, i) { 
+        //   return color(d.group);
+        //  })
+        // .on("mouseover", function(d, i) { 
+        //   addTooltip(d3.select(this));
+        //  })
+        // .on("mouseout",  function(d, i) { d3.select("#tooltip").remove(); });
+
+        
+        
+    // var x = parseFloat(circle.attr("cx"));
+    // var y = parseFloat(circle.attr("cy"));
+    // var r = parseFloat(circle.attr("r"));
+    // var text = circle.attr("id");
+
+    // var tooltip = d3.select("#plot")
+    //     .append("text")
+    //     .text(text)
+    //     .attr("x", x)
+    //     .attr("y", y)
+    //     .attr("dy", -r * 2)
+    //     .attr("id", "tooltip");
+}
+
+// Draws nice arcs for each link on plot
+function drawLinks(links, clickNode) {
+    // scale to generate radians (just for lower-half of circle)
+    var radians = d3.scale.linear()
+        .range([2 * Math.PI / 2, 4 * Math.PI / 2]);
+        // .range([0, 2 * Math.PI / 2]);
+        // .range([Math.PI / 2, 3 * Math.PI / 2]);
+
+    // path generator for arcs (uses polar coordinates)
+    var arc = d3.svg.line.radial()
+        .interpolate("basis")
+        .tension(0)
+        .angle(function(d) { 
+          return radians(d); 
+        });
+
+    // add links
+    d3.select("#plot").selectAll(".link")
+        .data(links)
+        .enter()
+        .append("path")
+        .attr("class", "link-inactive")
+        .attr("source", function(d) {
+          return d.source.source;
+        })
+        .attr("target", function(d) {
+          return d.target.target;
+        })
+        .attr("transform", function(d, i) {
+            // arc will always be drawn around (0, 0)
+            // shift so (0, 0) will be between source and target
+            var yshift = d.source.y + (d.target.y - d.source.y) / 2;
+            var xshift = yfixed;
+            // var xshift = d.source.x + (d.target.x - d.source.x) / 2;
+            // var yshift = yfixed;
+            return "translate(" + xshift + ", " + yshift + ")";
+            // return "translate(" + 46 + ", " + 14 + ")";
+        })
+        .classed('author-link', true)
+        .attr("d", function(d, i) {
+            // get x distance between source and target
+            // var xdist = Math.abs(d.source.x - d.target.x);
+            var ydist = Math.abs(d.source.y - d.target.y);
+
+            // set arc radius based on x distance
+            arc.radius(ydist / 2);
+
+            // want to generate 1/3 as many points per pixel in x direction
+            var points = d3.range(0, Math.ceil(ydist / 3));
+
+            // set radian scale domain
+            radians.domain([0, points.length - 1]);
+
+            // return path for arc
+            return arc(points);
+        })
+        .attr('targetIndex', function(d, i) {
+        })
+        .on('mouseover', function(d, i) {
+          d3.select(this)
+            .classed('link-active', true)
+          // alert(d.source.name + ', ' + d.target.name)
+        })
+        .on('mouseout', function(d, i) {
+          d3.select(this)
+            .classed('link-active', false)
+        })
+        .on('click', function(d, i) {
+          alert('source.name = ' + d.source.name + ', \n target.name = ' + d.target.name)
+        })
+} 
+
+d3.json("miserables.json", arcDiagram);
+  </script>
+    <script>
+      var margin = { top: 30, right: 20, bottom: 30, left: 20 },
+        width = 960,
+        barHeight = 20,
+        barWidth = (width - margin.left - margin.right) * 0.8;
+
+      var i = 0,
+        duration = 400,
+        root;
+
+      var diagonal = d3v4
+        .linkHorizontal()
+        .x(function(d) {
+          return d.y;
+        })
+        .y(function(d) {
+          return d.x;
+        });
+
+      // var svg = d3v4
+      //   .select('body')
+      //   .append('svg')
+      var svg = d3v4.select('#svg-indented')
+        // .attr('width', width) // + margin.left + margin.right)
+        .attr('width', 1200) // + margin.left + margin.right)
+        .attr('height', 900)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+
+      d3v4.json('flare.json', function(error, flare) {
+        if (error) throw error;
+        root = d3v4.hierarchy(flare);
+        root.x0 = 0;
+        root.y0 = 0;
+        update(root);
+      });
+
+      function update(source) {
+        // Compute the flattened node list.
+        var nodes = root.descendants();
+
+        // var height = Math.max(
+        //   500,
+        //   nodes.length * barHeight + margin.top + margin.bottom
+        // );
+
+        d3v4.select('svg')
+          .transition()
+          .duration(duration)
+          .attr('height', height);
+
+        d3v4.select(self.frameElement)
+          .transition()
+          .duration(duration)
+          .style('height', height + 'px');
+
+        // Compute the "layout". TODO https://github.com/d3/d3-hierarchy/issues/67
+        var index = -1;
+        root.eachBefore(function(n) {
+          n.x = ++index * barHeight;
+          n.y = n.depth * 20;
+        });
+
+        // Update the nodes…
+        var node = svg.selectAll('.node-indented').data(nodes, function(d) {
+          return d.id || (d.id = ++i);
+        });
+
+        var nodeEnter = node
+          .enter()
+          .append('g')
+          .attr('class', 'node-indented')
+          .attr('transform', function(d) {
+            return 'translate(' + source.y0 + ',' + source.x0 + ')';
+          })
+          .style('opacity', 0);
+
+        // Enter any new nodes at the parent's previous position.
+        nodeEnter
+          .append('rect')
+          .attr('y', -barHeight / 2)
+          .attr('height', barHeight)
+          .attr('width', 200)
+          // .attr('width', barWidth)
+          .style('fill', color)
+          .on('click', click);
+
+        nodeEnter
+          .append('text')
+          .attr('dy', 3.5)
+          .attr('dx', 5.5)
+          .text(function(d) {
+            return d.data.name;
+          });
+
+        // Transition nodes to their new position.
+        nodeEnter
+          .transition()
+          .duration(duration)
+          .attr('transform', function(d) {
+            return 'translate(' + d.y + ',' + d.x + ')';
+          })
+          .style('opacity', 1);
+
+        node
+          .transition()
+          .duration(duration)
+          .attr('transform', function(d) {
+            return 'translate(' + d.y + ',' + d.x + ')';
+          })
+          .style('opacity', 1)
+          .select('rect')
+          .style('fill', color);
+
+        // Transition exiting nodes to the parent's new position.
+        node
+          .exit()
+          .transition()
+          .duration(duration)
+          .attr('transform', function(d) {
+            return 'translate(' + source.y + ',' + source.x + ')';
+          })
+          .style('opacity', 0)
+          .remove();
+
+        // Update the links…
+        var link = svg.selectAll('.link-indented').data(root.links(), function(d) {
+          return d.target.id;
+        });
+
+        // Enter any new links at the parent's previous position.
+        link
+          .enter()
+          .insert('path', 'g')
+          .attr('class', 'link-indented')
+          .attr('d', function(d) {
+            var o = { x: source.x0, y: source.y0 };
+            return diagonal({ source: o, target: o });
+          })
+          .transition()
+          .duration(duration)
+          .attr('d', diagonal);
+
+        // Transition links to their new position.
+        link
+          .transition()
+          .duration(duration)
+          .attr('d', diagonal);
+
+        // Transition exiting nodes to the parent's new position.
+        link
+          .exit()
+          .transition()
+          .duration(duration)
+          .attr('d', function(d) {
+            var o = { x: source.x, y: source.y };
+            return diagonal({ source: o, target: o });
+          })
+          .remove();
+
+        // Stash the old positions for transition.
+        root.each(function(d) {
+          d.x0 = d.x;
+          d.y0 = d.y;
+        });
+      }
+
+      // Toggle children on click.
+      function click(d) {
+        alert(d.data.name)
+        if (d.children) {
+          d._children = d.children;
+          d.children = null;
+        } else {
+          d.children = d._children;
+          d._children = null;
+        }
+        update(d);
+      }
+
+      function color(d) {
+        return d._children ? '#3182bd' : d.children ? '#c6dbef' : '#fd8d3c';
+      }
+    </script>
+    <script>
+
+    </script>
+</body>
+</html>
