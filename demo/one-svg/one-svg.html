@@ -101,7 +101,7 @@ function arcDiagram(graph) {
     // create plot area within svg image
     var plot = svg.append("g")
         .attr("id", "plot")
-        .attr("transform", "translate(" + 800 + ", " + 0 + ")");
+        .attr("transform", "translate(" + 500 + ", " + 0 + ")");
         // .attr("transform", "translate(" + pad * 50 + ", " + pad + ")");
         // .attr("transform", "translate(" + pad + ", " + pad + ")");
 
@@ -276,8 +276,8 @@ function drawNodes(nodes) {
 function drawLinks(links, clickNode) {
     // scale to generate radians (just for lower-half of circle)
     var radians = d3.scale.linear()
-        .range([2 * Math.PI / 2, 4 * Math.PI / 2]);
-        // .range([0, 2 * Math.PI / 2]);
+        // .range([2 * Math.PI / 2, 4 * Math.PI / 2]);
+        .range([0, 2 * Math.PI / 2]);
         // .range([Math.PI / 2, 3 * Math.PI / 2]);
 
     // path generator for arcs (uses polar coordinates)
@@ -304,7 +304,7 @@ function drawLinks(links, clickNode) {
             // arc will always be drawn around (0, 0)
             // shift so (0, 0) will be between source and target
             var yshift = d.source.y + (d.target.y - d.source.y) / 2;
-            var xshift = yfixed;
+            var xshift = yfixed + 100;
             // var xshift = d.source.x + (d.target.x - d.source.x) / 2;
             // var yshift = yfixed;
             return "translate(" + xshift + ", " + yshift + ")";
