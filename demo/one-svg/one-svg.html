@@ -30,6 +30,7 @@
     }
 
     .test-line {
+      fill: none;
       stroke: red;
     }
   </style>
@@ -395,35 +396,43 @@ d3.json("miserables.json", arcDiagram);
       });
 
       function indented2Arc (indented, arc) {
-        debugger
         indented = indented.slice(0, 12)
         arc = arc.slice(0, 12)
         var dataset = [];
         indented.forEach(function(c, i, a) {
             var obj = {};
-            obj.x1 = c.y
-            obj.y1 = c.x
-            obj.x2 = arc[i].x
-            obj.y2 = arc[i].y
+            obj.x1 = c.y + 200 | 0
+            obj.y1 = c.x | 0
+            obj.x2 = arc[i].x + 500 - 20 | 0
+            obj.y2 = arc[i].y | 0
             dataset.push(obj)
         })
         svg.selectAll('test-line')
           .data(dataset)
           .enter()
-          .append('line')
-          .attr('x1', function(d, i) {
-            return d.x1 + 200
-          })
-          .attr('y1', function(d, i) {
-            return d.y1
-          })
-          .attr('x2', function(d, i) {
-            return d.x2 + 500 - 20
-          })
-          .attr('y2', function(d, i) {
-            return d.y2
+          .append('path')
+          .attr('d', function(d, i) {
+            // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
+            return `M${d.x2},${d.y2}C${(d.x1+d.x2)/2},${d.y2} ${(d.x1+d.x2)/2},${d.y1} ${d.x1} ${d.y1}`
           })
           .classed('test-line', true)
+        // svg.selectAll('test-line')
+        //   .data(dataset)
+        //   .enter()
+        //   .append('line')
+        //   .attr('x1', function(d, i) {
+        //     return d.x1 + 200
+        //   })
+        //   .attr('y1', function(d, i) {
+        //     return d.y1
+        //   })
+        //   .attr('x2', function(d, i) {
+        //     return d.x2 + 500 - 20
+        //   })
+        //   .attr('y2', function(d, i) {
+        //     return d.y2
+        //   })
+        //   .classed('test-line', true)
 
       }
       function update(source) {
@@ -450,7 +459,6 @@ d3.json("miserables.json", arcDiagram);
           n.x = ++index * barHeight;
           n.y = n.depth * 20;
         });
-debugger
         // Update the nodes…
         var node = svg.selectAll('.node-indented').data(nodes, function(d) {
           return d.id || (d.id = ++i);
