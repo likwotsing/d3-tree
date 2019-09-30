@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+  <style>
+.axis path,
+.axis line{
+    fill: none;
+    stroke: black;
+    shape-rendering: crispEdges;
+}
+
+.axis text {
+    font-family: sans-serif;
+    font-size: 11px;
+}
+.test-line {
+  stroke: red;
+}
+  </style>
+</head>
+<body>
+  <script src="../../js/d3.v3.js"></script>
+  <script>
+    //画布大小
+var width = 400;
+var height = 400;
+
+ //画布大小
+var width = 400;
+var height = 400;
+
+//在 body 里添加一个 SVG 画布   
+var svg = d3.select("body")
+    .append("svg")
+    .attr("width", width)
+    .attr("height", height);
+
+
+
+
+var dataset = [{
+  x1: 0,
+  y1: 0,
+  x2: 100,
+  y2: 100
+}, {
+  x1: 20,
+  y1: 20,
+  x2: 200,
+  y2: 200
+}]
+svg.selectAll('.test-line')
+        .data(dataset)
+        .enter()
+        .append('line')
+        .attr('x1', function(d) {
+          return d.x1
+        })
+        .attr('y1', function(d) {
+          return d.y1
+        })
+        .attr('x2', function(d) {
+          return d.x2
+        })
+        .attr('y2', function(d) {
+          return d.y2
+        })
+        .classed('test-line', true)
+        
+  </script>
+</body>
+</html>

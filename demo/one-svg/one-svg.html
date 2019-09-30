@@ -28,6 +28,10 @@
       stroke: none;
       fill: red;
     }
+
+    .test-line {
+      stroke: red;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +40,9 @@
   <script src="../../js/d3.v3.js"></script>
   <script src="../../js/d3.v4.js"></script>
   <script>
+    var indentedNodes = null;
+    var arcNodes = null;
+
 /* GLOBALS */
 
 var width  = 960;           // width of svg image
@@ -91,7 +98,6 @@ function arcDiagram(graph) {
     //     .attr("width", width)
     //     .attr("height", height)
     var svg  = d3.select("#svg-indented")
-
     // draw border around svg image
     // svg.append("rect")
     //     .attr("class", "outline")
@@ -121,7 +127,6 @@ function arcDiagram(graph) {
 
     // draw links first, so nodes appear on top
     drawLinks(graph.links);
-
     // draw nodes last
     drawNodes(graph.nodes);
 }
@@ -143,6 +148,7 @@ function linearLayout(nodes) {
         d.y = xscale(i * 1.2);
         d.x = yfixed;
     });
+    arcNodes = nodes;
     // nodes.forEach(function(d, i) {
     //     d.x = xscale(i);
     //     d.y = yfixed;
@@ -169,6 +175,7 @@ function drawNodes(nodes) {
         .attr('width', 100)
         .attr('height', 2)
         .classed('node-inactive', true)
+        .classed('paragraph-rect', true)
         .attr('source', function(d, i) {
           if(d.source) {
             return d.source;
@@ -381,12 +388,47 @@ d3.json("miserables.json", arcDiagram);
         root.x0 = 0;
         root.y0 = 0;
         update(root);
+
+        console.log(indentedNodes)
+        console.log(arcNodes)
+        indented2Arc(indentedNodes, arcNodes)
       });
 
+      function indented2Arc (indented, arc) {
+        debugger
+        indented = indented.slice(0, 12)
+        arc = arc.slice(0, 12)
+        var dataset = [];
+        indented.forEach(function(c, i, a) {
+            var obj = {};
+            obj.x1 = c.y
+            obj.y1 = c.x
+            obj.x2 = arc[i].x
+            obj.y2 = arc[i].y
+            dataset.push(obj)
+        })
+        svg.selectAll('test-line')
+          .data(dataset)
+          .enter()
+          .append('line')
+          .attr('x1', function(d, i) {
+            return d.x1 + 200
+          })
+          .attr('y1', function(d, i) {
+            return d.y1
+          })
+          .attr('x2', function(d, i) {
+            return d.x2 + 500 - 20
+          })
+          .attr('y2', function(d, i) {
+            return d.y2
+          })
+          .classed('test-line', true)
+
+      }
       function update(source) {
         // Compute the flattened node list.
         var nodes = root.descendants();
-
         // var height = Math.max(
         //   500,
         //   nodes.length * barHeight + margin.top + margin.bottom
@@ -408,11 +450,13 @@ d3.json("miserables.json", arcDiagram);
           n.x = ++index * barHeight;
           n.y = n.depth * 20;
         });
-
+debugger
         // Update the nodes…
         var node = svg.selectAll('.node-indented').data(nodes, function(d) {
           return d.id || (d.id = ++i);
         });
+
+        indentedNodes = nodes;
 
         var nodeEnter = node
           .enter()
@@ -431,6 +475,7 @@ d3.json("miserables.json", arcDiagram);
           .attr('width', 200)
           // .attr('width', barWidth)
           .style('fill', color)
+          .classed('indented-rect', true)
           .on('click', click);
 
         nodeEnter
@@ -529,9 +574,6 @@ d3.json("miserables.json", arcDiagram);
       function color(d) {
         return d._children ? '#3182bd' : d.children ? '#c6dbef' : '#fd8d3c';
       }
-    </script>
-    <script>
-
     </script>
 </body>
 </html>
