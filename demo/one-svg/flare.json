@@ -1,31 +1,30 @@
 {
-  "name": "flare",
+  "name": "书名",
   "children": [
    {
-    "name": "analytics",
+    "name": "第一章",
     "children": [
      {
-      "name": "cluster",
-      "children": [
-       {"name": "AgglomerativeCluster", "size": 3938},
-       {"name": "CommunityStructure", "size": 3812}
-      ]
+      "name": "第一节"
+     },
+     {
+      "name": "第二节"
      }
     ]
    },
    {
-    "name": "animate",
+    "name": "第二章",
     "children": [
-     {"name": "Easing", "size": 17010},
-     {"name": "FunctionSequence", "size": 5842},
-     {
-      "name": "interpolate",
-      "children": [
-       {"name": "DateInterpolator", "size": 1375}
-      ]
-     },
-     {"name": "ISchedulable", "size": 1041},
-     {"name": "Parallel", "size": 5176}
+     {"name": "第一节", "size": 17010},
+     {"name": "第二节", "size": 5842}
+    ]
+   },
+   {
+    "name": "第三章",
+    "children": [
+     {"name": "第一节", "size": 17010},
+     {"name": "第二节", "size": 5842},
+     {"name": "第三节"}
     ]
    }
   ]
