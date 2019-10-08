@@ -395,16 +395,17 @@ d3.json("miserables.json", arcDiagram);
         indented2Arc(indentedNodes, arcNodes)
       });
 
-      function indented2Arc (indented, arc) {
-        indented = indented.slice(0, 12)
-        arc = arc.slice(0, 12)
+      function indented2Arc (source) {
+
+        indentedNodes = indentedNodes.slice(0, 12)
+        arcNodes = arcNodes.slice(0, 12)
         var dataset = [];
-        indented.forEach(function(c, i, a) {
+        indentedNodes.forEach(function(c, i, a) {
             var obj = {};
-            obj.x1 = c.y + 200 | 0
+            obj.x1 = (c.y + 200 - c.depth * 20) | 0
             obj.y1 = c.x | 0
-            obj.x2 = arc[i].x + 500 - 20 | 0
-            obj.y2 = arc[i].y | 0
+            obj.x2 = arcNodes[i].x + 500 - 20 | 0
+            obj.y2 = arcNodes[i].y | 0
             dataset.push(obj)
         })
         svg.selectAll('test-line')
@@ -480,7 +481,11 @@ d3.json("miserables.json", arcDiagram);
           .append('rect')
           .attr('y', -barHeight / 2)
           .attr('height', barHeight)
-          .attr('width', 200)
+          .attr('width', function(d, i) {
+            return 200 - d.depth * 20
+            // depth
+          })
+          // .attr('width', 200)
           // .attr('width', barWidth)
           .style('fill', color)
           .classed('indented-rect', true)
@@ -523,7 +528,6 @@ d3.json("miserables.json", arcDiagram);
           })
           .style('opacity', 0)
           .remove();
-
         // Update the links…
         var link = svg.selectAll('.link-indented').data(root.links(), function(d) {
           return d.target.id;
@@ -568,7 +572,7 @@ d3.json("miserables.json", arcDiagram);
 
       // Toggle children on click.
       function click(d) {
-        alert(d.data.name)
+        // alert(d.data.name)
         if (d.children) {
           d._children = d.children;
           d.children = null;
@@ -577,6 +581,7 @@ d3.json("miserables.json", arcDiagram);
           d._children = null;
         }
         update(d);
+        // indented2Arc(d)
       }
 
       function color(d) {
