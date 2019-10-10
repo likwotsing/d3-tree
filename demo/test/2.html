@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Document</title>
+</head>
+<body>
+  
+  <script>
+
+    const schema = {
+      first: {
+        require: true
+      },
+      last: {
+        required: true
+      }
+    }
+
+    const validate = (schema, values) =>  {
+      for(field in schema) {
+        if(schema[field].required) {
+          if(!values[field]) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    console.log(validate(schema, {first: 'andy'}))
+    console.log(validate(schema, {fist: 'andy', last: 'bob'}))
+    console.log(validate(schema, {fist: 'andy', last: 'bob', sayhi: 'carl'}))
+  </script>
+</body>
+</html>
