@@ -24,7 +24,7 @@ var svg = d3v4
   .append('g')
   .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
 
-d3v4.json('flare.json', function(error, flare) {
+d3v4.json('story.json', function(error, flare) {
   if (error) throw error;
   root = d3v4.hierarchy(flare);
   root.x0 = 0;
