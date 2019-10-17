@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <title>indented-tree</title>
+    <style>
+      /* .node rect {
+        cursor: pointer;
+        fill: #fff;
+        fill-opacity: 0.5;
+        stroke: #3182bd;
+        stroke-width: 1.5px;
+      } */
+
+      .node text {
+        font: 10px sans-serif;
+        pointer-events: none;
+      }
+
+      .link {
+        fill: none;
+        stroke: #9ecae1;
+        stroke-width: 1.5px;
+      }
+
+      .normal-node {
+        fill: #c6dbef;
+        stroke: blue;
+        stroke-width: 0.5px;
+      }
+      .parent-node {
+        fill: red;
+      }
+      .children-node {
+        fill: green;
+      }
+      .sibling-node {
+        fill: yellow;
+      }
+    </style>
+  </head>
+  <body>
+    <script src="../../js/d3.v4.js"></script>
+    <script src="story.js"></script>
+  </body>
+</html>
