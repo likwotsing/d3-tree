@@ -15,7 +15,8 @@ var catalogDiagonal = d3v4
 var svg = d3v4.select('#catalog-story')
 .attr('width', 1200)
 .attr('height', 900)
-.append('g')
+var catalogG = svg.append('g')
+.attr('class', 'catalog-wrapper')
 .attr('transform', 'translate(20, 30)');
 
 d3v4.json('catalog.json', function(error, flare) {
@@ -39,7 +40,7 @@ indentedNodes.forEach(function(c, i, a) {
     obj.y2 = arcNodes[i].y | 0
     dataset.push(obj)
 })
-svg.selectAll('test-line')
+catalogG.selectAll('test-line')
   .data(dataset)
   .enter()
   .append('path')
@@ -66,7 +67,7 @@ catalogRoot.eachBefore(function(n) {
   n.y = n.depth * 20;
 });
 // Update the nodes…
-var node = svg.selectAll('.catalog-node-indented').data(nodes, function(d) {
+var node = catalogG.selectAll('.catalog-node-indented').data(nodes, function(d) {
   return d.id || (d.id = ++index);
 });
 
@@ -131,7 +132,7 @@ node
   .style('opacity', 0)
   .remove();
 // Update the links…
-var link = svg.selectAll('.catalog-link-indented').data(catalogRoot.links(), function(d) {
+var link = catalogG.selectAll('.catalog-link-indented').data(catalogRoot.links(), function(d) {
   return d.target.id;
 });
 
