@@ -27,164 +27,164 @@ d3v4.json('catalog.json', function(error, flare) {
   catalogUpdate(catalogRoot);
 });
 
-function indented2Arc (source) {
-
-indentedNodes = indentedNodes.slice(0, 12)
-arcNodes = arcNodes.slice(0, 12)
-var dataset = [];
-indentedNodes.forEach(function(c, i, a) {
-    var obj = {};
-    obj.x1 = (c.y + 200 - c.depth * 20) | 0
-    obj.y1 = c.x | 0
-    obj.x2 = arcNodes[i].x + 500 - 20 | 0
-    obj.y2 = arcNodes[i].y | 0
-    dataset.push(obj)
-})
-catalogG.selectAll('test-line')
-  .data(dataset)
-  .enter()
-  .append('path')
-  .attr('d', function(d, i) {
-    // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
-    return `M${d.x2},${d.y2}C${(d.x1+d.x2)/2},${d.y2} ${(d.x1+d.x2)/2},${d.y1} ${d.x1} ${d.y1}`
-  })
-  .classed('test-line', true)
-}
+var catalogNodes = null; // 第一次获取的节点
+var updateCatalogNodes = null; // 每次点击后重新获取的节点
+var catalogEnterNodes = [];
+var catalogExitNodes = [];
 function catalogUpdate(source) {
-// Compute the flattened node list.
-var nodes = catalogRoot.descendants();
+  // source.data.children === undefined, 点击的节点没有children
+  if(source.data.children === undefined) {
+    return;
+  }
+  // 每次点击，都清空enter和eixt
+  catalogEnterNodes = [];
+  catalogExitNodes = [];
+  // Compute the flattened node list.
+  var nodes = catalogRoot.descendants();
+  // Compute the "layout". TODO https://github.com/d3/d3-hierarchy/issues/67
+  var index = -1;
+  catalogRoot.eachBefore(function(n) {
+    n.x = ++index * catalogBarHeight;
+    n.y = n.depth * 20;
+  });
+  // Update the nodes…
+  var node = catalogG.selectAll('.catalog-node-indented').data(nodes, function(d) {
+    return d.data.id || (d.id = ++index);
+    // return d.id || (d.id = ++index);
+  });
+  
 
-d3v4.select('svg')
-  .transition()
-  .duration(catalogDuration)
-  .attr('height', 600);
+  var nodeEnter = node
+    .enter()
+    .append('g')
+    .attr('class', 'catalog-node-indented')
+    .attr('transform', function(d) {
+      return 'translate(' + source.y0 + ',' + source.x0 + ')';
+    })
+    .style('opacity', 0);
 
+  // Enter any new nodes at the parent's previous position.
+  nodeEnter
+    .append('rect')
+    .attr('y', -catalogBarHeight / 2)
+    .attr('height', catalogBarHeight)
+    .attr('width', function(d, i) {
+      return 200 - d.depth * 20
+    })
+    .style('fill', catalogColor)
+    .classed('indented-rect', true)
+    .on('click', catalogClick);
 
-// Compute the "layout". TODO https://github.com/d3/d3-hierarchy/issues/67
-var index = -1;
-catalogRoot.eachBefore(function(n) {
-  n.x = ++index * catalogBarHeight;
-  n.y = n.depth * 20;
-});
-// Update the nodes…
-var node = catalogG.selectAll('.catalog-node-indented').data(nodes, function(d) {
-  return d.id || (d.id = ++index);
-});
+  nodeEnter
+    .append('text')
+    .attr('dy', 3.5)
+    .attr('dx', 5.5)
+    .text(function(d) {
+      return d.data.name;
+    });
 
-indentedNodes = nodes;
+  // Transition nodes to their new position.
+  nodeEnter
+    .transition()
+    .duration(catalogDuration)
+    .attr('transform', function(d) {
+      return 'translate(' + d.y + ',' + d.x + ')';
+    })
+    .style('opacity', 1);
 
-var nodeEnter = node
-  .enter()
-  .append('g')
-  .attr('class', 'catalog-node-indented')
-  .attr('transform', function(d) {
-    return 'translate(' + source.y0 + ',' + source.x0 + ')';
-  })
-  .style('opacity', 0);
+  node
+    .transition()
+    .duration(catalogDuration)
+    .attr('transform', function(d) {
+      return 'translate(' + d.y + ',' + d.x + ')';
+    })
+    .style('opacity', 1)
+    .select('rect')
+    .style('fill', catalogColor);
 
-// Enter any new nodes at the parent's previous position.
-nodeEnter
-  .append('rect')
-  .attr('y', -catalogBarHeight / 2)
-  .attr('height', catalogBarHeight)
-  .attr('width', function(d, i) {
-    return 200 - d.depth * 20
-  })
-  .style('fill', catalogColor)
-  .classed('indented-rect', true)
-  .on('click', catalogClick);
-
-nodeEnter
-  .append('text')
-  .attr('dy', 3.5)
-  .attr('dx', 5.5)
-  .text(function(d) {
-    return d.data.name;
+  // Transition exiting nodes to the parent's new position.
+  node
+    .exit()
+    .transition()
+    .duration(catalogDuration)
+    .attr('transform', function(d) {
+      return 'translate(' + source.y + ',' + source.x + ')';
+    })
+    .style('opacity', 0)
+    .remove();
+    
+  if(!catalogNodes) { // 第一次加载
+    catalogNodes = nodes;
+    updateCatalogNodes = nodes;
+    // catalogNodes = Object.assign({}, nodes);
+  } else {
+    updateCatalogNodes = nodes;
+  }
+  // Update the links…
+  var link = catalogG.selectAll('.catalog-link-indented').data(catalogRoot.links(), function(d) {
+    return d.target.id;
   });
 
-// Transition nodes to their new position.
-nodeEnter
-  .transition()
-  .duration(catalogDuration)
-  .attr('transform', function(d) {
-    return 'translate(' + d.y + ',' + d.x + ')';
+  // Enter any new links at the parent's previous position.
+  link
+    .enter()
+    .insert('path', 'g')
+    .attr('class', 'catalog-link-indented')
+    .attr('d', function(d) {
+      var o = { x: source.x0, y: source.y0 };
+      return catalogDiagonal({ source: o, target: o });
+    })
+    .transition()
+    .duration(catalogDuration)
+    .attr('d', catalogDiagonal);
+
+  // Transition links to their new position.
+  link
+    .transition()
+    .duration(catalogDuration)
+    .attr('d', catalogDiagonal);
+
+  // Transition exiting nodes to the parent's new position.
+  link
+    .exit()
+    .transition()
+    .duration(catalogDuration)
+    .attr('d', function(d) {
+      var o = { x: source.x, y: source.y };
+      return catalogDiagonal({ source: o, target: o });
+    })
+    .remove();
+
+  // Stash the old positions for transition.
+  catalogRoot.each(function(d) {
+    d.xx = d.x0;
+    d.yy = d.y0;
+    d.x0 = d.x;
+    d.y0 = d.y;
+  });
+  node.enter().each(function(c, i, a) {
+    catalogEnterNodes.push(c);
   })
-  .style('opacity', 1);
-
-node
-  .transition()
-  .duration(catalogDuration)
-  .attr('transform', function(d) {
-    return 'translate(' + d.y + ',' + d.x + ')';
+  node.exit().each(function(c, i, a) {
+    catalogExitNodes.push(c)
   })
-  .style('opacity', 1)
-  .select('rect')
-  .style('fill', catalogColor);
 
-// Transition exiting nodes to the parent's new position.
-node
-  .exit()
-  .transition()
-  .duration(catalogDuration)
-  .attr('transform', function(d) {
-    return 'translate(' + source.y + ',' + source.x + ')';
-  })
-  .style('opacity', 0)
-  .remove();
-// Update the links…
-var link = catalogG.selectAll('.catalog-link-indented').data(catalogRoot.links(), function(d) {
-  return d.target.id;
-});
-
-// Enter any new links at the parent's previous position.
-link
-  .enter()
-  .insert('path', 'g')
-  .attr('class', 'catalog-link-indented')
-  .attr('d', function(d) {
-    var o = { x: source.x0, y: source.y0 };
-    return catalogDiagonal({ source: o, target: o });
-  })
-  .transition()
-  .duration(catalogDuration)
-  .attr('d', catalogDiagonal);
-
-// Transition links to their new position.
-link
-  .transition()
-  .duration(catalogDuration)
-  .attr('d', catalogDiagonal);
-
-// Transition exiting nodes to the parent's new position.
-link
-  .exit()
-  .transition()
-  .duration(catalogDuration)
-  .attr('d', function(d) {
-    var o = { x: source.x, y: source.y };
-    return catalogDiagonal({ source: o, target: o });
-  })
-  .remove();
-
-// Stash the old positions for transition.
-catalogRoot.each(function(d) {
-  d.x0 = d.x;
-  d.y0 = d.y;
-});
 }
 
 // Toggle children on click.
 function catalogClick(d) {
-// alert(d.data.name)
-if (d.children) {
-  d._children = d.children;
-  d.children = null;
-} else {
-  d.children = d._children;
-  d._children = null;
-}
-catalogUpdate(d);
-// indented2Arc(d)
+  // alert(d.data.name)
+  if (d.children) {
+    d._children = d.children;
+    d.children = null;
+  } else {
+    d.children = d._children;
+    d._children = null;
+  }
+  catalogUpdate(d);
+  if(catalogNodes && storyNodes) {
+    indented2Arc(true)
+  }
 }
 
 function catalogColor(d) {

@@ -21,10 +21,14 @@ d3v4.json('story.json', function(error, flare) {
 
 var storyClickNode = null;
 
+var storyNodes = null;
 function storyUpdate(source) {
+  // source.data.children === undefined, 点击的节点没有children
+  if(source.data.children === undefined) {
+    return;
+  }
   // Compute the flattened node list.
   var nodes = storyRoot.descendants();
-
   d3v4.select(self.frameElement)
     .transition()
     .duration(storyDuration)
@@ -104,12 +108,19 @@ function storyUpdate(source) {
     .style('opacity', 0)
     .remove();
 
+  if(!storyNodes) {
+    storyNodes = nodes;
+  }
+
+  indented2Arc()
+
   // Stash the old positions for transition.
   storyRoot.each(function(d) {
     d.x0 = d.x;
     d.y0 = d.y;
   });
 }
+
 
 // Toggle children on click.
 function storyClick(d) {

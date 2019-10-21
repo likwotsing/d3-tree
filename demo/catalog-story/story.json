@@ -1,31 +1,43 @@
 {
   "name": "1",
-  "id": "1",
+  "id": "story1",
   "pid": "null",
+  "sectionid": "section1-1",
+  "chapterid": "chapter1",
   "children": [
    {
     "name": "2",
-    "id": "2",
-    "pid": "1",
+    "id": "story2",
+    "pid": "story1",
+    "sectionid": "section1-2",
+    "chapterid": "chapter1",
     "children": [
      {
       "name": "4",
-      "id": "4",
-      "pid": "2"
+      "id": "story4",
+      "pid": "story2",
+      "sectionid": "section2-1",
+      "chapterid": "chapter2"
      }, {
        "name": "5",
-       "id": "5",
-       "pid": "2",
+       "id": "story5",
+       "pid": "story2",
+       "sectionid": "section2-2",
+       "chapterid": "chapter2",
        "children": [
          {
            "name": "6",
            "id": "6",
            "pid": "5",
+           "sectionid": "section3-1",
+           "chapterid": "chapter3",
            "children": [
              {
                "name": "7",
                "id": "7",
-               "pid": "6"
+               "pid": "6",
+               "sectionid": "section3-1",
+               "chapterid": "chapter3"
              }
            ]
          }
@@ -35,8 +47,10 @@
    },
    {
     "name": "3",
-    "id": "3",
-    "pid": "1"
+    "id": "story3",
+    "pid": "story1",
+    "sectionid": "section1-1",
+    "chapterid": "chapter1"
    }
   ]
  }

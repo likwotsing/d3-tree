@@ -7,13 +7,193 @@
   <title>Document</title>
   <link rel="stylesheet" href="./catalog.css">
   <link rel="stylesheet" href="./story.css">
+  <style>
+  .test-line {
+    fill: none;
+    stroke: red;
+  }
+  </style>
 </head>
 <body>
     <svg id="catalog-story"></svg>
   <script src="../../js/d3.v3.js"></script>
   <script src="../../js/d3.v4.js"></script>
 
+  <script>
+    function indented2Arc (source) {
+      // souce为true时，是点击事件
+      var dataset = [];
+      var sNodes = []; // 存储section节点，第一次加载后就不会改变了
+      var cNodes = []; // 存储chapter、book节点
+      var updateSNodes = []; // 更新后的section节点，每次点击后改变
+      catalogNodes.forEach(function(c, i, a) {
+        if(!c.children) {
+          sNodes.push(c)
+        } else {
+          cNodes.push(c)
+        }
+      })
+      updateCatalogNodes.forEach(function(c, i, a) {
+        if(!c.children) {
+          updateSNodes.push(c)
+        } else {
+        }
+      })
+      storyNodes.forEach(function(c, i, a) {
+        var obj = {};
+        var flag = false;
+        obj.x2 = c.y + 400 | 0;
+        obj.y2 = c.x + 0;
+
+        for(var m = 0; m < sNodes.length; m++) {
+          if(c.data.sectionid === sNodes[m].data.id) {
+            // 找到左侧对应的sectionid
+            // 去updateSNodes里获取更新后的坐标值
+            for(var n = 0; n < updateSNodes.length; n++) {
+              if(c.data.sectionid === updateSNodes[n].data.id) {
+                flag = true;
+                obj.x1 = (updateSNodes[n].y + 200 - updateSNodes[n].depth * 20) | 0
+                obj.y1 = updateSNodes[n].x | 0
+                obj.xx = (updateSNodes[n].yy + 200 - updateSNodes[n].depth * 20) | 0
+                obj.yy = updateSNodes[n].xx | 0
+                break;
+              }
+            }
+            if(!flag) {
+              // 说明没有在更新后的节点里找到对应的id，所以赋值父节点的id
+              for(var l = 0; l < updateSNodes.length; l++) {
+                if(c.data.chapterid === updateSNodes[l].data.id) {
+                  flag = true
+                  obj.x1 = (updateSNodes[l].y + 200 - updateSNodes[l].depth * 20) | 0
+                  obj.y1 = updateSNodes[l].x | 0
+                  obj.xx = (updateSNodes[l].yy + 200 - updateSNodes[l].depth * 20) | 0
+                  obj.yy = updateSNodes[l].xx | 0
+                  break;
+                }
+              }
+            }
+            if(!flag) {
+              // 如果还没找到，那点击的就是节点就是book
+              flag = true
+              obj.x1 = (updateSNodes[0].y + 200 - updateSNodes[0].depth * 20) | 0
+              obj.y1 = updateSNodes[0].x | 0
+              obj.xx = (updateSNodes[0].yy + 200 - updateSNodes[0].depth * 20) | 0
+              obj.yy = updateSNodes[0].xx | 0
+            }
+          }
+        }
+        dataset.push(obj);
+      })
+
+      if(source) {
+        catalogG.selectAll('.test-line')
+          .remove()
+      }
+      var catalogPathWrapper = catalogG.append('g')
+        .attr('class', 'catalog-path-wrapper')
+
+        // .transition()
+        // .duration(1000)
+        // .delay(500)
+
+      var cEnter = catalogPathWrapper.selectAll('test-line')
+        .data(dataset)
+        .enter()
+        .append('path')
+        .attr('d', function(d, i) {
+          // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
+          return `M${d.x2},${d.y2}C${(d.xx+d.x2)/2},${d.y2} ${(d.xx+d.x2)/2},${d.y1} ${d.xx} ${d.yy}`
+        })
+        .classed('test-line', true)
+        .transition()
+        .duration(500)
+        .attr('d', function(d, i) {
+          // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
+          return `M${d.x2},${d.y2}C${(d.x1+d.x2)/2},${d.y2} ${(d.x1+d.x2)/2},${d.y1} ${d.x1} ${d.y1}`
+        })
+
+        // .delay(function(d,i){
+        //   return i * 200;
+        // })
+
+      // var cEnter = catalogPathWrapper.selectAll('test-line')
+      //   .data(dataset)
+      //   .enter()
+      //   .append('path')
+      //   .attr('d', function(d, i) {
+      //     // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
+      //     return `M${d.x2},${d.y2}C${(d.x1+d.x2)/2},${d.y2} ${(d.x1+d.x2)/2},${d.y1} ${d.x1} ${d.y1}`
+      //   })
+      //   .classed('test-line', true)
+        
+    }
+
+    // function indented2Arc (source) {
+    //   // souce为true时，是点击事件
+    //   var dataset = [];
+    //   var sNodes = []; // 存储section节点
+    //   var cNodes = []; // 存储chapter、book节点
+    //   catalogNodes.forEach(function(c, i, a) {
+    //     if(!c.children) {
+    //       sNodes.push(c)
+    //     } else {
+    //       cNodes.push(c)
+    //     }
+    //   })
+    //   debugger
+    //   catalogEnterNodes;
+    //   catalogExitNodes;
+    //   storyNodes.forEach(function(c, i, a) {
+    //     var obj = {};
+    //     var flag = false;
+    //     obj.x2 = c.y + 400 | 0;
+    //     obj.y2 = c.x + 0;
+    //     for(var j = 0; j < sNodes.length; j++) {
+    //       if(c.data.sectionid === sNodes[j].data.id) {
+    //         flag = true; // 说明没有被折叠
+    //         obj.x1 = (sNodes[j].y + 200 - sNodes[j].depth * 20) | 0
+    //         obj.y1 = sNodes[j].x | 0
+    //         break;
+    //       }
+    //     }
+    //     if(!flag) { // 如果被折叠了，就找父节点的坐标值
+    //       for(var k = 0; k < cNodes.length; k++) {
+    //         if(c.data.chapterid === cNodes[k].data.chapterid) {
+    //           obj.x1 = (sNodes[k].y + 200 - sNodes[k].depth * 20) | 0
+    //           obj.y1 = sNodes[k].x | 0
+    //           break;
+    //         }
+    //       }
+    //     }
+    //     dataset.push(obj);
+    //   })
+    //   // sNodes.forEach(function(c, i, a) {
+    //   //     var obj = {};
+    //   //     obj.x1 = (c.y + 200 - c.depth * 20) | 0
+    //   //     obj.y1 = c.x | 0
+    //   //     obj.x2 = storyNodes[i].y + 400 | 0
+    //   //     obj.y2 = storyNodes[i].x | 0
+    //   //     // obj.x2 = storyNodes[i].x + 400 - 20 | 0
+    //   //     // obj.y2 = storyNodes[i].y | 0
+    //   //     dataset.push(obj)
+    //   // })
+    //   if(source) {
+    //     catalogG.selectAll('.test-line')
+    //       .remove()
+    //   }
+    //   catalogG.selectAll('test-line')
+    //     .data(dataset)
+    //     .enter()
+    //     .append('path')
+    //     .attr('d', function(d, i) {
+    //       // Mx2, y2 C (x1+x2)/2,y2 (x1+x2)/2,y1 x1,y1 
+    //       return `M${d.x2},${d.y2}C${(d.x1+d.x2)/2},${d.y2} ${(d.x1+d.x2)/2},${d.y1} ${d.x1} ${d.y1}`
+    //     })
+    //     .classed('test-line', true)
+    // }
+  </script>
   <script src="./catalog.js"></script>
   <script src="./story.js"></script>
+  
 </body>
 </html>
